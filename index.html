@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101b19" />
+    <meta name="description" content="Velo Rush — 一场山野间的 3D 自行车竞速。" />
+    <title>VELO RUSH — 山野竞速</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game-canvas" aria-label="3D 自行车竞速赛道"></canvas>
+      <div class="wind-layer" id="wind-layer" aria-hidden="true"></div>
+
+      <div class="topbar">
+        <a class="brand" href="#" aria-label="Velo Rush 首页"><span class="brand-mark">V</span><span>VELO<span class="brand-light">RUSH</span></span></a>
+        <div class="race-tag"><span class="live-dot"></span> ALPINE CIRCUIT <span class="tag-divider">/</span> 山谷环线</div>
+        <button class="icon-button" id="sound-button" aria-label="关闭风声" aria-pressed="true" title="关闭风声">◖))</button>
+      </div>
+
+      <section class="race-hud" id="race-hud" aria-label="比赛数据">
+        <div class="race-time"><span class="eyebrow">比赛用时</span><strong id="timer">00:00.00</strong></div>
+        <div class="position-card"><span class="position-number" id="position">4</span><span class="position-copy">名次 <small>/ 4</small></span></div>
+        <div class="lap-card"><div class="lap-label"><span>赛道进度</span><strong id="progress-label">0%</strong></div><div class="progress-track"><i id="progress-fill"></i></div><div class="racer-markers" id="racer-markers"></div></div>
+      </section>
+
+      <div class="minimap" aria-label="赛道路线及骑手位置">
+        <svg viewBox="0 0 200 150" aria-hidden="true">
+          <path class="minimap-route" id="minimap-route"></path>
+          <g id="minimap-markers"></g>
+        </svg>
+      </div>
+
+      <div class="speed-card" id="speed-card"><div class="speed-top"><span class="eyebrow">当前速度</span><span class="gear-pill">KM/H</span></div><div class="speed-readout"><strong id="speed">0</strong><span>km/h</span></div><div class="speed-ticks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+
+      <div class="stamina-card" id="stamina-card"><div class="stamina-head"><span class="eyebrow">体力</span><span class="boost-state" id="boost-state">READY</span></div><div class="stamina-track"><i id="stamina-fill"></i></div><div class="stamina-hints"><span>冲刺能量</span><span id="stamina-value">100%</span></div></div>
+
+      <div class="toast" id="toast" role="status"></div>
+      <div class="offroad-warning hidden" id="offroad-warning" role="status">已冲出赛道 · <strong id="offroad-seconds">5</strong> 秒内返回</div>
+      <button class="pause-button" id="pause-button" aria-label="暂停比赛">Ⅱ</button>
+
+      <div class="overlay" id="start-overlay">
+        <div class="intro-card">
+          <div class="intro-kicker"><span class="live-dot"></span> 山谷环线 · 第 01 站</div>
+          <h1>山风正好。<br /><em>出发吧。</em></h1>
+          <p>穿过松林与山坡，在最后一段直道全力冲刺。</p>
+          <div class="intro-stats"><div><strong>2.4<span> km</span></strong><small>赛道长度</small></div><div><strong>04</strong><small>参赛骑手</small></div><div><strong>01</strong><small>比赛圈数</small></div></div>
+          <button class="primary-button" id="start-button"><span>开始比赛</span><b>↗</b></button>
+          <div class="control-line"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span><span>踩踏 · 转向 · 刹车</span><span class="control-gap"></span><span class="keycap keycap-wide">SHIFT</span><span>冲刺</span></div>
+        </div>
+        <div class="intro-side"><span class="side-rule"></span><span>RIDE YOUR LINE</span><span>01 — 04</span></div>
+      </div>
+
+      <div class="overlay overlay-compact hidden" id="pause-overlay">
+        <div class="result-card pause-card"><span class="eyebrow">比赛进行中</span><h2>歇口气？</h2><p>赛道还在等你。</p><button class="primary-button" id="resume-button"><span>继续比赛</span><b>↗</b></button><button class="text-button" id="restart-button">重新开始</button></div>
+      </div>
+
+      <div class="overlay overlay-compact hidden" id="result-overlay">
+        <div class="result-card"><span class="eyebrow" id="result-kicker">比赛完成</span><h2 id="result-title">冲线！</h2><div class="result-place"><span id="result-place">1</span><small>名</small></div><div class="result-details"><div><span>完赛时间</span><strong id="result-time">00:00.00</strong></div><div><span>赛道进度</span><strong>100%</strong></div><div><span>个人最佳</span><strong id="best-time">—</strong></div></div><button class="primary-button" id="again-button"><span>再跑一圈</span><b>↗</b></button></div>
+      </div>
+
+      <div class="overlay overlay-compact hidden" id="death-overlay">
+        <div class="result-card death-card"><span class="eyebrow">冲出赛道</span><h2>已死亡</h2><p>正在从离开赛道的位置重生…</p></div>
+      </div>
+
+      <div class="bottom-hint" id="bottom-hint"><span class="hint-key">W</span> 按住踩踏 <span class="hint-separator">·</span> <span class="hint-key">SHIFT</span> 冲刺 <span class="hint-separator">·</span> <span class="hint-key">A D</span> 过弯</div>
+      <div class="mobile-controls" id="mobile-controls"><button data-control="left">↶</button><button data-control="right">↷</button><button data-control="pedal">踩踏</button><button data-control="boost">冲刺</button></div>
+      <div class="vignette"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
